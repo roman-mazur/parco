@@ -15,10 +15,11 @@
   </path>
 
   <target name="parser-prepare">
+    <delete dir="${parser.home}" failonerror="false"/>
     <mkdir dir="${parser.home}"/>
     <taskdef classpathref="antlr.path" name="antlr3" classname="org.apache.tools.ant.antlr.ANTLR3"/>
     <echo>${src.main.antlr}</echo>
-    <antlr3 target="${src.main.antlr}/${grammar.name}.g" debug="true" outputdirectory="${parser.home}">
+    <antlr3 target="${src.main.antlr}/${grammar.name}.g" outputdirectory="${parser.home}">
       <classpath refid="antlr.path"/>
     </antlr3>
   </target>
