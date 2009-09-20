@@ -1,14 +1,16 @@
 package org.mazur.parco;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
+import java.util.List;
 
-import org.antlr.runtime.ANTLRFileStream;
-import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeAdaptor;
-import org.mazur.parco.parser.ParcoLexer;
-import org.mazur.parco.parser.ParcoParser;
+import org.mazur.parco.parser.ParcoAnalyzer;
+import org.mazur.parco.parser.ParsingException;
 
 /**
  * Version: $Id$
@@ -18,22 +20,55 @@ import org.mazur.parco.parser.ParcoParser;
  */
 public class LexerParserTest {
 
-  public static void main(final String[] args) throws IOException, RecognitionException {
-    ParcoLexer lexer = new ParcoLexer(new ANTLRFileStream(args[0]));
-    CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-    ParcoParser parser = new ParcoParser(tokenStream);
-    parser.setTreeAdaptor(new CommonTreeAdaptor() {
-      @Override
-      public Object create(final Token payload) {
-        System.out.println("Create " + payload);
-        return new CommonTree(payload);
+  /** User characters reader. */
+  private static Reader reader = new InputStreamReader(System.in, Charset.forName("UTF-8"));
+  
+  /** Input builder. */
+  private static StringBuilder inputBuilder = new StringBuilder();
+  
+  private static void parse(final InputStream input) throws IOException {
+    ParcoAnalyzer pa = new ParcoAnalyzer(input, Charset.forName("UTF-8"));
+    boolean correct = pa.parse();
+    if (correct) {
+      System.out.println("OK");
+      System.out.println("-----------------");
+      System.out.println(pa.getTree().toStringTree());
+    } else {
+      List<ParsingException> errors = pa.getErrors();
+      for (ParsingException e : errors) {
+        System.out.println(e.getMessage());
       }
-    });
-    ParcoParser.expr_return result = parser.expr();
-    CommonTree tree = (CommonTree)result.getTree();
-    print(tree, 0);
-    System.out.println("-----------------");
-    System.out.println(tree.toStringTree());
+    }
+  }
+  
+  private static String readString() {
+    int cnt = 0;
+    char[] buffer = new char[512];
+    do {
+      try {
+        cnt = reader.read(buffer);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      if (cnt > 0) { inputBuilder.append(buffer, 0, cnt); }
+      int index = inputBuilder.indexOf("\n");
+      if (index >= 0) { 
+        String res = inputBuilder.substring(0, index - 1);
+        inputBuilder.delete(0, index + 1);
+        return res;
+      }
+    } while (true);
+  }
+  
+  public static void main(final String[] args) throws IOException, RecognitionException {
+    System.out.println("Hello");
+    do {
+      System.out.println("Enter expression please");
+      String input = readString();
+      if (input.length() == 0) { break; } 
+      parse(new ByteArrayInputStream(input.getBytes()));
+    } while (true);
+    System.out.println("Bye");
   }
   
   public static void print(final CommonTree tree, final int indent) {
