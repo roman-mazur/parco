@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
+import org.antlr.runtime.tree.DOTTreeGenerator;
+import org.mazur.parco.optimize.ParcoOptimizer;
 import org.mazur.parco.parser.ParcoAnalyzer;
 import org.mazur.parco.parser.ParsingException;
 
@@ -32,8 +34,17 @@ public class LexerParserTest {
     if (correct) {
       System.out.println("OK");
       System.out.println("-----------------");
-      System.out.println(pa.getTree().toStringTree());
+      CommonTree tree = pa.getTree();
+      System.out.println(tree.toStringTree());
+      System.out.println("-----------------");
+      ParcoOptimizer opt = new ParcoOptimizer();
+      tree = opt.optimize(tree);
+      System.out.println(tree.toStringTree());
+      DOTTreeGenerator generator = new DOTTreeGenerator();
+      String result = generator.toDOT(tree).toString();
+      System.out.println(result);
     } else {
+      System.out.println("ERROR");
       List<ParsingException> errors = pa.getErrors();
       for (ParsingException e : errors) {
         System.out.println(e.getMessage());
