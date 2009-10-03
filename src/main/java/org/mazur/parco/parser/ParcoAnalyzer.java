@@ -9,13 +9,19 @@ import java.util.List;
 
 import org.antlr.runtime.ANTLRReaderStream;
 import org.antlr.runtime.BitSet;
+import org.antlr.runtime.CharStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.IntStream;
 import org.antlr.runtime.MismatchedTokenException;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
+import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTree;
+import org.antlr.runtime.tree.CommonTreeAdaptor;
+import org.mazur.parco.model.ConstantNode;
+import org.mazur.parco.model.DoubleOperationNode;
+import org.mazur.parco.model.VariableNode;
 
 /**
  * Version: $Id$
@@ -35,9 +41,26 @@ public class ParcoAnalyzer {
   
   public ParcoAnalyzer(final InputStream input, final Charset charset) throws IOException {
     Reader reader = new InputStreamReader(input, charset);
-    lexer = new ParcoLexer(new ANTLRReaderStream(reader));
+    lexer = new Lexer(new ANTLRReaderStream(reader));
     CommonTokenStream tokenStream = new CommonTokenStream(lexer);
     parser = new Parser(tokenStream);
+//    parser.setTreeAdaptor(new CommonTreeAdaptor() {
+//      @Override
+//      public Object create(final Token payload) {
+//        switch (payload.getType()) {
+//        case ParcoLexer.CONST: return new ConstantNode(payload);
+//        case ParcoLexer.IDENTIFIER: return new VariableNode(payload);
+//        case ParcoLexer.DIV:
+//        case ParcoLexer.MINUS:
+//        case ParcoLexer.MOD:
+//        case ParcoLexer.MULT:
+//        case ParcoLexer.PLUS:
+//        case ParcoLexer.POWER:
+//          return new DoubleOperationNode(payload);
+//        default: return null;
+//        }
+//      }
+//    });
   }
 
   /**
@@ -74,6 +97,28 @@ public class ParcoAnalyzer {
     @Override
     protected Object recoverFromMismatchedToken(final IntStream input, final int ttype,
         final BitSet follow) throws RecognitionException {
+      throw new MismatchedTokenException(ttype, input);
+    }
+    @Override
+    public Object recoverFromMismatchedSet(final IntStream input,
+        final RecognitionException e, final BitSet follow) throws RecognitionException {
+      return new MismatchedTokenException(e.token.getType(), input);
+    }
+  }
+  
+  /**
+   * @author Roman Mazur (mailto: mazur.roman@gmail.com)
+   */
+  private static class Lexer extends ParcoLexer {
+    public Lexer(final CharStream input) {
+      this(input, new RecognizerSharedState());
+    }
+    public Lexer(CharStream input, RecognizerSharedState state) {
+      super(input,state);
+    }
+    @Override
+    protected Object recoverFromMismatchedToken(IntStream input, int ttype,
+        BitSet follow) throws RecognitionException {
       throw new MismatchedTokenException(ttype, input);
     }
   }

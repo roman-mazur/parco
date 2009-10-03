@@ -35,8 +35,12 @@ public class ParsingException extends Exception {
     this.pos = e.charPositionInLine;
     this.token = e.token;
     this.character = (char)e.c;
-    message = "ERROR. Line " + line + ". Position " + pos + ".";
-    if (token != null) { message += " Bad token: " + token.getText(); }
+    if (token != null && token.getType() == -1) {
+      message = "ERROR. Expression is not completed.";
+    } else {
+      message = "ERROR. Line " + line + ". Position " + pos + ".";
+      if (token != null) { message += " Bad token: " + token.getText(); }
+    }
   }
   
   @Override
