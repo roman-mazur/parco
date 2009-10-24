@@ -19,6 +19,9 @@ import org.mazur.parco.visualizer.Vizualizer;
  */
 public class ParcoOptimizer {
 
+  /** Flag to display the step. */
+  private boolean displayStep = false;
+  
   /** First pass optimizers. */
   private List<NodeOptimizer> firstPassOptimizers = Arrays.asList(new NodeOptimizer[] {
       new UnarOptimizer()  
@@ -28,6 +31,10 @@ public class ParcoOptimizer {
   private List<List> optimizers = new LinkedList<List>(Arrays.asList(new List[] {
       firstPassOptimizers
   }));
+
+  public void setDisplayStep(final boolean displayStep) {
+    this.displayStep = displayStep;
+  }
   
   public static boolean isOperation(final Tree node) {
     int t = node.getType();
@@ -76,8 +83,10 @@ public class ParcoOptimizer {
       }
       System.out.println("------->>>--------");
       System.out.println(result.toStringTree());
-      DotGen gen = new DotGen();
-      Vizualizer.run(gen.toDOT(result).toString(), "Step " + (++index));
+      if (displayStep) {
+        DotGen gen = new DotGen();
+        Vizualizer.run(gen.toDOT(result).toString(), "Step " + (++index));
+      }
     }
     return result;
   }

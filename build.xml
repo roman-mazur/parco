@@ -14,6 +14,10 @@
     <fileset dir="${lib.home}/antlr" includes="*.jar"/>
   </path>
 
+  <path id="compile.path">
+    <fileset dir="${lib.home}" includes="*.jar"/>
+  </path>
+
   <target name="parser-prepare">
     <delete dir="${parser.home}" failonerror="false"/>
     <mkdir dir="${parser.home}"/>
@@ -22,6 +26,11 @@
     <antlr3  target="${src.main.antlr}/${grammar.name}.g" outputdirectory="${parser.home}">
       <classpath refid="antlr.path"/>
     </antlr3>
+  </target>
+
+  <target name="build" depends="parser-prepare">
+    <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc" classpathref="my.classpath"/>
+
   </target>
   
 </project>
