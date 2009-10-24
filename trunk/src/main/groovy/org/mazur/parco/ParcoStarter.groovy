@@ -55,6 +55,7 @@ def parse = { InputStream input ->
     Vizualizer.run(dotGenerator.toDOT(tree).toString(), "Source")
     println tree.toStringTree()
     tree = opt.optimize(tree);
+    Vizualizer.run(dotGenerator.toDOT(tree).toString(), "Result")
     println "Done"
   } else {
     System.out.println("ERROR");

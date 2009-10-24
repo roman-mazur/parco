@@ -25,7 +25,8 @@ public class OptimizeExtender {
       if (!isOperation(node.parent)) {return null }
       for (def pair in [[ParcoLexer.MINUS, ParcoLexer.PLUS], [ParcoLexer.DIV, ParcoLexer.MULT]]) {
         if (node.type == pair[0] && node.parent.type == pair[1]) {
-          Tree p = node.parent
+          Tree nodeParent = node.parent 
+          Tree p = nodeParent
           while (p.parent?.type == pair[1]) { p = p.parent }
           int index = node.childIndex
           Tree lowChild = node.getChild(index)
@@ -33,7 +34,7 @@ public class OptimizeExtender {
           if (p.parent) { node.parent.setChild p.childIndex, node }
           node.setChild index, p
           p.parent = node
-          p.setChild index, lowChild
+          nodeParent.setChild index, lowChild
           result = node.parent ? null : node
           break
         }
@@ -50,6 +51,7 @@ public class OptimizeExtender {
       if (!node.parent) { return null }
       if (node.type == node.parent.type) {
         int index = node.childIndex
+        if (index) { return null }
         CommonTree list = new CommonTree(null)
         node.children.each { list.addChild it }
         node.parent.replaceChildren(index, index, list)
