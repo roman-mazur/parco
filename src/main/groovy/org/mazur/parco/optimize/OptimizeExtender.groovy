@@ -16,6 +16,7 @@ import static org.mazur.parco.optimize.ParcoOptimizer.*
  *
  */
 public class OptimizeExtender {
+  
   static void extend(final ParcoOptimizer opt) {
 
     def popupMinus = {CommonTree node ->

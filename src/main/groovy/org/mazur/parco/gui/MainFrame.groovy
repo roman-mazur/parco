@@ -1,10 +1,19 @@
 package org.mazur.parco.gui
 
-import javax.swing.JFrame;
-import javax.swing.JTextField;
-import java.awt.BorderLayout as BL
+import javax.swing.WindowConstants;
 
 import groovy.swing.SwingBuilder;
+
+import javax.swing.JList;
+import javax.swing.JTextField;
+
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import javax.swing.JFrame;
+import java.awt.BorderLayout as BL;
+
+import java.awt.Color;
 
 /**
  * Version: $Id$
@@ -25,6 +34,9 @@ public class MainFrame {
   /** Expression field. */
   private JTextField exprField
   
+  /** List. */
+  JList variantsList
+  
   /** Main action. */
   private def goAction = swing.action(
     name : "Go",
@@ -34,6 +46,11 @@ public class MainFrame {
     }
   )
   
+  public void setVariantsList(final JList list) {
+    variantsList = list
+    mediator.variantsList = list
+  }
+  
   /**
    * Displays the new frame.
    */
@@ -42,7 +59,7 @@ public class MainFrame {
       frame.visible = true
       return
     }
-    frame = swing.frame(title : "parco", pack : true) {
+    frame = swing.frame(title : "parco", pack : true, defaultCloseOperation : WindowConstants.EXIT_ON_CLOSE) {
       borderLayout()
       panel(constraints : BL.NORTH) {
         borderLayout()
@@ -56,10 +73,24 @@ public class MainFrame {
       panel(constraints : BL.CENTER) {
         borderLayout()
         label(text : "Variants", constraints : BL.NORTH)
-        list(constraints : BL.CENTER)
+        scrollPane(constraints : BL.CENTER, size : [700, 500]) {
+          variantsList = list(selectionBackground : Color.GREEN, selectionForeground : Color.RED)
+          variantsList.addMouseListener new MouseClosure({ MouseEvent event ->
+            if (event.clickCount == 2) {
+              mediator.showTree(variantsList.locationToIndex(event.point))
+            }
+          })
+        }
       }
     }
     frame.visible = true
   }
   
+}
+
+class MouseClosure extends MouseAdapter {
+  private def c
+  public MouseClosure(def c) { this.c = c }
+  @Override
+  public void mouseClicked(final MouseEvent e) { c(e) }
 }

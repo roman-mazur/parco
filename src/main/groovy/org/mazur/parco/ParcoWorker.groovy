@@ -5,6 +5,7 @@ import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.Tree;
 
 import java.nio.charset.Charset;
+import java.util.LinkedList;
 
 import java.io.ByteArrayInputStream;
 
@@ -39,9 +40,9 @@ public class ParcoWorker {
     OptimizeExtender.extend(optimizer)
   }
   
-  void addVariant(final String expr) { addVariant(expr, true) }
+  List<ParcoVariant> addVariant(final String expr) { return addVariant(expr, true) }
   
-  void addVariant(final String expr, final boolean modify) {
+  List<ParcoVariant> addVariant(final String expr, final boolean modify) {
     InputStream input = new ByteArrayInputStream(expr.bytes)
     ParcoAnalyzer analyzer = new ParcoAnalyzer(input, Charset.forName("UTF-8"))
     if (!analyzer.parse()) {
@@ -50,9 +51,16 @@ public class ParcoWorker {
       throw new RuntimeException(errors.toString());
     }
     CommonTree tree = analyzer.getTree()
+    tree = optimizer.optimize(tree)
     DotGen dotGen = new DotGen()
     String dotStr = dotGen.toDOT(tree).toString()
-    variants += new ParcoVariant(tree : tree, image : Vizualizer.getImage(dotStr))
+    ParcoVariant v = new ParcoVariant(tree : tree, image : Vizualizer.getImage(dotStr))
+    LinkedList<ParcoVariant> result = new LinkedList<ParcoVariant>()
+    result += v
+    if (!modify) { return result }
+    return result
   }
+  
+  public List<ParcoVariant> getVariants() { return variants }
   
 }

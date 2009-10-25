@@ -1,23 +1,36 @@
 package org.mazur.parco.variants;
 
-import org.antlr.runtime.tree.CommonTree;
 import java.awt.Image;
+
+import org.antlr.runtime.tree.CommonTree;
+import org.mazur.parco.parser.ParcoLexer;
 
 public class ParcoVariant {
 
   CommonTree tree
   
-  Image image;
+  Image image
   
-  private String str
+  String str
   
-  private String getStr() {
-    return ''
+  private String getString(final CommonTree tree) {
+    if (!tree) { return '' }
+    if (tree.token.type == ParcoLexer.IDENTIFIER || tree.token.type == ParcoLexer.CONST) {
+      return tree.toString()
+    }
+    StringBuilder sb = new StringBuilder()
+    int cIndex = 0
+    if (tree.childCount == 2) {
+      sb << getString(tree.getChild(0))
+      cIndex = 1
+    }
+    sb << ' ' << tree.toString() << ' ' << getString(tree.getChild(cIndex))
+    return '(' + sb.toString() + ')'
   }
   
   @Override
   String toString() {
-    if (!str) { str = getStr() }
+    if (!str) { str = getString(tree) }
     return str
   }
   
