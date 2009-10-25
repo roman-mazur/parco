@@ -9,8 +9,6 @@ import java.util.List;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.Tree;
 import org.mazur.parco.parser.ParcoLexer;
-import org.mazur.parco.visualizer.DotGen;
-import org.mazur.parco.visualizer.Vizualizer;
 
 
 /**
@@ -83,10 +81,6 @@ public class ParcoOptimizer {
       }
       System.out.println("------->>>--------");
       System.out.println(result.toStringTree());
-      if (displayStep) {
-        DotGen gen = new DotGen();
-        Vizualizer.run(gen.toDOT(result).toString(), "Step " + (++index));
-      }
     }
     return result;
   }

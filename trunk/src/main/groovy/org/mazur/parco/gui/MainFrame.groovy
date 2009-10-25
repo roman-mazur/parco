@@ -14,6 +14,8 @@ import groovy.swing.SwingBuilder;
  */
 public class MainFrame {
 
+  GUIMediator mediator
+  
   /** Builder. */
   private SwingBuilder swing = new SwingBuilder()
   
@@ -24,13 +26,13 @@ public class MainFrame {
   private JTextField exprField
   
   /** Main action. */
-  private def goAction = swing.action() {
+  private def goAction = swing.action(
     name : "Go",
     shortDescription : "Start processing",
     closure : {
-      println exprField.text
+      mediator.newExpression(exprField.text)
     }
-  }
+  )
   
   /**
    * Displays the new frame.

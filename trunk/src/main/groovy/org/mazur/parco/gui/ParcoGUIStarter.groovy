@@ -5,5 +5,6 @@ package org.mazur.parco.gui
  * @author Roman Mazur (mailto:mazur.roman@gmail.vcom)
  */
 
-def mf = new MainFrame()
+MainFrame mf = new MainFrame()
+mf.mediator = new GUIMediator()
 mf.showFrame()

@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="parco" basedir=".">
+<project name="parco" basedir="." default="build">
   <property name="lib.home" value="${basedir}/lib"/>
   <property name="src.main" value="./src/main"/>
   <property name="src.main.java" value="${src.main}/java"/>
+  <property name="src.main.groovy" value="${src.main}/groovy"/>
   <property name="src.main.generated" value="${src.main}/generated"/>
   <property name="src.main.antlr" value="${src.main}/antlr"/>
+  
+  <property name="output.home" value="${basedir}/output"/>
+  <property name="output.temp" value="${output.home}/temp"/>
+  <property name="build.home" value="${output.home}/${ant.project.name}"/>
   
   <property name="parser.home" value="${src.main.generated}/org/mazur/parco/parser"/>
   
   <property name="grammar.name" value="Parco"/>
   
-  <path id="antlr.path">
-    <fileset dir="${lib.home}/antlr" includes="*.jar"/>
-  </path>
-
   <path id="compile.path">
     <fileset dir="${lib.home}" includes="*.jar"/>
   </path>
@@ -21,16 +22,27 @@
   <target name="parser-prepare">
     <delete dir="${parser.home}" failonerror="false"/>
     <mkdir dir="${parser.home}"/>
-    <taskdef classpathref="antlr.path" name="antlr3" classname="org.apache.tools.ant.antlr.ANTLR3"/>
+    <taskdef classpathref="compile.path" name="antlr3" classname="org.apache.tools.ant.antlr.ANTLR3"/>
     <echo>${src.main.antlr}</echo>
     <antlr3  target="${src.main.antlr}/${grammar.name}.g" outputdirectory="${parser.home}">
-      <classpath refid="antlr.path"/>
+      <classpath refid="compile.path"/>
     </antlr3>
   </target>
 
   <target name="build" depends="parser-prepare">
-    <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc" classpathref="my.classpath"/>
-
+    <mkdir dir="${output.temp}/classes"/>
+    <mkdir dir="${build.home}"/>
+    <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc" classpathref="compile.path"/>
+    <groovyc classpathref="compile.path" destdir="${output.temp}/classes">
+      <src>
+        <fileset dir="${src.main.java}"/>
+        <fileset dir="${src.main.groovy}"/>
+      </src>
+      <javac
+         classpathref="compile.path"
+         debug="on"
+	    />
+    </groovyc>
   </target>
   
 </project>

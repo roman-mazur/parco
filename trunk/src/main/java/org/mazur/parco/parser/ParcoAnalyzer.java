@@ -15,13 +15,8 @@ import org.antlr.runtime.IntStream;
 import org.antlr.runtime.MismatchedTokenException;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
-import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeAdaptor;
-import org.mazur.parco.model.ConstantNode;
-import org.mazur.parco.model.DoubleOperationNode;
-import org.mazur.parco.model.VariableNode;
 
 /**
  * Version: $Id$
