@@ -38,9 +38,16 @@ public class ParcoWorker {
   public ParcoWorker() {
     optimizer = new ParcoOptimizer()
     OptimizeExtender.extend(optimizer)
+    variator = new ParcoVariator()
   }
   
   List<ParcoVariant> addVariant(final String expr) { return addVariant(expr, true) }
+
+  private ParcoVariant variant(CommonTree tree) {
+    DotGen dotGen = new DotGen()
+    String dotStr = dotGen.toDOT(tree).toString()
+    return new ParcoVariant(tree : tree, image : Vizualizer.getImage(dotStr))
+  }
   
   List<ParcoVariant> addVariant(final String expr, final boolean modify) {
     InputStream input = new ByteArrayInputStream(expr.bytes)
@@ -51,13 +58,15 @@ public class ParcoWorker {
       throw new RuntimeException(errors.toString());
     }
     CommonTree tree = analyzer.getTree()
+    CommonTree original = ParcoVariator.copy(tree)
     tree = optimizer.optimize(tree)
-    DotGen dotGen = new DotGen()
-    String dotStr = dotGen.toDOT(tree).toString()
-    ParcoVariant v = new ParcoVariant(tree : tree, image : Vizualizer.getImage(dotStr))
     LinkedList<ParcoVariant> result = new LinkedList<ParcoVariant>()
-    result += v
+    result += variant(tree)
     if (!modify) { return result }
+    variator.variants(original).each() { CommonTree vt ->
+      result += variant(vt)
+      println "new by modify"
+    }
     return result
   }
   

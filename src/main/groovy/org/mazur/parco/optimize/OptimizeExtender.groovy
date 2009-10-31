@@ -1,12 +1,11 @@
 package org.mazur.parco.optimize
 
-import org.antlr.runtime.tree.DOTTreeGenerator
 import org.antlr.runtime.CommonToken;
-import org.antlr.runtime.Token;
-import org.antlr.runtime.tree.CommonTree
-import org.mazur.parco.parser.ParcoLexer
-import org.mazur.parco.visualizer.Vizualizer;
-import org.antlr.runtime.tree.Tree
+import org.antlr.runtime.tree.CommonTree;
+import org.antlr.runtime.tree.Tree;
+import org.mazur.parco.parser.ParcoLexer;
+import org.mazur.parco.variants.ParcoVariator;
+
 import static org.mazur.parco.optimize.ParcoOptimizer.*
 
 /**
@@ -16,6 +15,23 @@ import static org.mazur.parco.optimize.ParcoOptimizer.*
  *
  */
 public class OptimizeExtender {
+  
+  private static def combineSimilar = { CommonTree node -> 
+    if (!isOperation(node)) { return null }
+    if (!node.parent) { return null }
+    if (node.type == node.parent.type) {
+      int index = node.childIndex
+      if (index) { return null }
+      CommonTree list = new CommonTree(null)
+      node.children.each { list.addChild it }
+      node.parent.replaceChildren(index, index, list)
+    }
+  }
+  
+  static void extendVariator(final ParcoVariator var) {
+    // combine similar nodes
+    var.addOptimizer 0, combineSimilar
+  }
   
   static void extend(final ParcoOptimizer opt) {
 
@@ -47,17 +63,7 @@ public class OptimizeExtender {
     opt.addOptimizer 1, popupMinus
 
     // combine similar nodes
-    opt.addOptimizer 2, { CommonTree node -> 
-      if (!isOperation(node)) { return null }
-      if (!node.parent) { return null }
-      if (node.type == node.parent.type) {
-        int index = node.childIndex
-        if (index) { return null }
-        CommonTree list = new CommonTree(null)
-        node.children.each { list.addChild it }
-        node.parent.replaceChildren(index, index, list)
-      }
-    }
+    opt.addOptimizer 2, combineSimilar
 
     // inverse
     opt.addOptimizer 3, { CommonTree node ->
