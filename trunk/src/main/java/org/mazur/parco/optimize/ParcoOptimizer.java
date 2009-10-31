@@ -30,6 +30,18 @@ public class ParcoOptimizer {
       firstPassOptimizers
   }));
 
+  @SuppressWarnings("unchecked")
+  protected void initOptimizers() {
+    optimizers = new LinkedList<List>(Arrays.asList(new List[] {
+        firstPassOptimizers
+    }));
+  }
+  
+  @SuppressWarnings("unchecked")
+  protected void setOptimizers(final List<List> list) {
+    optimizers = list;
+  }
+  
   public void setDisplayStep(final boolean displayStep) {
     this.displayStep = displayStep;
   }
@@ -79,8 +91,8 @@ public class ParcoOptimizer {
           stack.push(child);
         }
       }
-      System.out.println("------->>>--------");
-      System.out.println(result.toStringTree());
+//      System.out.println("------->>>--------");
+//      System.out.println(result.toStringTree());
     }
     return result;
   }
