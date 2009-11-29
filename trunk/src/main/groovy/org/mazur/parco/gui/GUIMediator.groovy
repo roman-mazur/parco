@@ -27,6 +27,8 @@ public class GUIMediator {
   
   JList variantsList
   
+  public void setHeightsFilter(boolean value) { worker.heightsFilter = value }
+  
   public void setVariantsList(JList variantsList) {
     this.variantsList = variantsList
     this.variantsList.model = new DefaultListModel()
