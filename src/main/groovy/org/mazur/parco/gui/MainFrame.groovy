@@ -5,6 +5,7 @@ import javax.swing.WindowConstants;
 import groovy.swing.SwingBuilder;
 
 import javax.swing.JList;
+import javax.swing.JCheckBox;
 import javax.swing.JTextField;
 
 import java.awt.event.MouseAdapter;
@@ -34,6 +35,9 @@ public class MainFrame {
   /** Expression field. */
   private JTextField exprField
   
+  /** Heights filter checkbox. */
+  private JCheckBox heightsFilterCB
+  
   /** List. */
   JList variantsList
   
@@ -43,6 +47,15 @@ public class MainFrame {
     shortDescription : "Start processing",
     closure : {
       mediator.newExpression(exprField.text)
+    }
+  )
+  
+  /** Heights filter action. */
+  private def heigtsFilterAction = swing.action(
+    name : "Hights filter",
+    shortDescription : "Enable/disable heights filter",
+    closure : {
+      mediator.heightsFilter = heightsFilterCB.selected
     }
   )
   
@@ -64,17 +77,18 @@ public class MainFrame {
       panel(constraints : BL.NORTH) {
         borderLayout()
         label(text : "Enter an expression", constraints : BL.NORTH)
-        panel() {
-          borderLayout()
+        panel(constraints : BL.CENTER) {
+          borderLayout(constraints : BL.CENTER)
           exprField = textField(constraints : BL.CENTER, action : goAction)
           button(text : "Go", constraints : BL.EAST, action : goAction)
         }
+        heightsFilterCB = checkBox(action : heigtsFilterAction, constraints : BL.SOUTH)
       }
       panel(constraints : BL.CENTER) {
         borderLayout()
         label(text : "Variants", constraints : BL.NORTH)
         scrollPane(constraints : BL.CENTER, size : [700, 500]) {
-          variantsList = list(selectionBackground : Color.GREEN, selectionForeground : Color.RED)
+          variantsList = list(selectionBackground : Color.GREEN, selectionForeground : Color.RED, foreground : Color.GRAY)
           variantsList.addMouseListener new MouseClosure({ MouseEvent event ->
             if (event.clickCount == 2) {
               mediator.showTree(variantsList.locationToIndex(event.point))

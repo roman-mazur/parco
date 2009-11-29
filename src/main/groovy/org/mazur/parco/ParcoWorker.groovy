@@ -38,6 +38,8 @@ public class ParcoWorker {
   private HashSet<String> variantsSet = new HashSet<String>()
   private HashSet<Integer> heightsSet = new HashSet<Integer>()
   
+  boolean heightsFilter = false
+  
   public ParcoWorker() {
     optimizer = new ParcoOptimizer()
     OptimizeExtender.extend(optimizer)
@@ -62,7 +64,7 @@ public class ParcoWorker {
     if (variantsSet.contains(key)) { return null }
     int h = height(tree)
     println "Height: $h"
-    if (heightsSet.contains(h)) { return null }
+    if (heightsFilter && heightsSet.contains(h)) { return null }
     heightsSet += h
     variantsSet += key
     //result.image = Vizualizer.getImage(tree)
@@ -71,6 +73,7 @@ public class ParcoWorker {
   
   List<ParcoVariant> addVariant(final String expr, final boolean modify) {
     variantsSet.clear()
+    heightsSet.clear()
     InputStream input = new ByteArrayInputStream(expr.bytes)
     ParcoAnalyzer analyzer = new ParcoAnalyzer(input, Charset.forName("UTF-8"))
     if (!analyzer.parse()) {
