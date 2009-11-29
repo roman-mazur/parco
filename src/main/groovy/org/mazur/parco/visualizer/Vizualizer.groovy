@@ -1,5 +1,7 @@
 package org.mazur.parco.visualizer
 
+import org.antlr.runtime.tree.CommonTree;
+
 import java.io.ByteArrayInputStream;
 
 import javax.swing.ImageIcon;
@@ -25,6 +27,10 @@ public class Vizualizer {
   private Vizualizer() {
   }
   
+  public static Image getImage(final CommonTree tree) {
+    DotGen gen = new DotGen()
+    return getImage(gen.toDOT(tree).toString())
+  }
   
   public static Image getImage(final String source) {
     String[] args = new String[3]
@@ -58,7 +64,7 @@ public class Vizualizer {
     return ImageIO.read(new ByteArrayInputStream(imageBytes))
   }
   
-  public static void run(final String source, final String title) {
+  public static void run(final def source, final String title) {
     Image image = getImage(source)
     ImageIcon icon = new ImageIcon(image)
     SwingBuilder.build {

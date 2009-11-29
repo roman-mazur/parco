@@ -3,6 +3,7 @@ package org.mazur.parco.gui;
 
 import org.mazur.parco.ParcoWorker;
 import org.mazur.parco.variants.ParcoVariant;
+import org.mazur.parco.visualizer.Vizualizer;
 
 import groovy.swing.SwingBuilder;
 
@@ -42,6 +43,9 @@ public class GUIMediator {
   
   public void showTree(final int index) {
     ParcoVariant v = (ParcoVariant)variantsList.model.getElementAt(index)
+    if (!v.image) {
+      v.image = Vizualizer.getImage(v.tree)
+    }
     SwingBuilder.build() {
       (frame(title : v.toString(), pack : true) {
         label(icon : new ImageIcon(v.image))

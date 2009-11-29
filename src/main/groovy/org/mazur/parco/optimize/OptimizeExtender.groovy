@@ -16,21 +16,28 @@ import static org.mazur.parco.optimize.ParcoOptimizer.*
  */
 public class OptimizeExtender {
   
-  private static def combineSimilar = { CommonTree node -> 
-    if (!isOperation(node)) { return null }
-    if (!node.parent) { return null }
-    if (node.type == node.parent.type) {
-      int index = node.childIndex
-      if (index) { return null }
-      CommonTree list = new CommonTree(null)
-      node.children.each { list.addChild it }
-      node.parent.replaceChildren(index, index, list)
+  private static constructCombineSimilar(final boolean strictToCommutation, final Closure affected) {
+    return { CommonTree node ->
+      if (!isOperation(node)) { return null }
+      if (!node.parent) { return null }
+      if (strictToCommutation && node.type != ParcoLexer.PLUS && node.type != ParcoLexer.MULT) {
+        return null;
+      }
+      if (node.type == node.parent.type) {
+        int index = node.childIndex
+        if (!strictToCommutation && index) { return null }
+        CommonTree list = new CommonTree(null)
+        node.children.each { list.addChild it }
+        node.parent.replaceChildren(index, index, list)
+        if (affected) { affected() }
+        return null
+      }
     }
   }
   
-  static void extendVariator(final ParcoVariator var) {
+  static void extendVariator(final ParcoVariator var, final Closure affected) {
     // combine similar nodes
-    var.addOptimizer 0, combineSimilar
+    var.addOptimizer 0, constructCombineSimilar(true, affected)
   }
   
   static void extend(final ParcoOptimizer opt) {
@@ -63,7 +70,7 @@ public class OptimizeExtender {
     opt.addOptimizer 1, popupMinus
 
     // combine similar nodes
-    opt.addOptimizer 2, combineSimilar
+    opt.addOptimizer 2, constructCombineSimilar(false, null)
 
     // inverse
     opt.addOptimizer 3, { CommonTree node ->
