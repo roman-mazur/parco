@@ -5,7 +5,9 @@ import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.Tree;
 
 import java.nio.charset.Charset;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 
 import java.io.ByteArrayInputStream;
 
@@ -33,7 +35,8 @@ public class ParcoWorker {
   /** Variator. */
   private ParcoVariator variator
   
-  private List<ParcoVariant> variants = new LinkedList<ParcoVariant>()
+  private HashSet<String> variantsSet = new HashSet<String>()
+  private HashSet<Integer> heightsSet = new HashSet<Integer>()
   
   public ParcoWorker() {
     optimizer = new ParcoOptimizer()
@@ -43,13 +46,31 @@ public class ParcoWorker {
   
   List<ParcoVariant> addVariant(final String expr) { return addVariant(expr, true) }
 
+  private int height(final CommonTree tree) {
+    if (!tree.childCount) { return 1 }
+    int h = 0
+    tree.children.each() {
+      int c = height(it)
+      if (h < c) { h = c }
+    }
+    return h + 1
+  }
+  
   private ParcoVariant variant(CommonTree tree) {
-    DotGen dotGen = new DotGen()
-    String dotStr = dotGen.toDOT(tree).toString()
-    return new ParcoVariant(tree : tree, image : Vizualizer.getImage(dotStr))
+    ParcoVariant result = new ParcoVariant(tree : tree)
+    String key = result.toString()
+    if (variantsSet.contains(key)) { return null }
+    int h = height(tree)
+    println "Height: $h"
+    if (heightsSet.contains(h)) { return null }
+    heightsSet += h
+    variantsSet += key
+    //result.image = Vizualizer.getImage(tree)
+    return result 
   }
   
   List<ParcoVariant> addVariant(final String expr, final boolean modify) {
+    variantsSet.clear()
     InputStream input = new ByteArrayInputStream(expr.bytes)
     ParcoAnalyzer analyzer = new ParcoAnalyzer(input, Charset.forName("UTF-8"))
     if (!analyzer.parse()) {
@@ -57,15 +78,16 @@ public class ParcoWorker {
       analyzer.errors.each() { errors << it << "\n" }
       throw new RuntimeException(errors.toString());
     }
-    CommonTree tree = analyzer.getTree()
-    CommonTree original = ParcoVariator.copy(tree)
-    tree = optimizer.optimize(tree)
     LinkedList<ParcoVariant> result = new LinkedList<ParcoVariant>()
+    CommonTree tree = analyzer.getTree()
+    tree = optimizer.optimize(tree)
+    CommonTree treeCopy = ParcoVariator.copy(tree)
     result += variant(tree)
     if (!modify) { return result }
-    variator.variants(original).each() { CommonTree vt ->
-      result += variant(vt)
-      println "new by modify"
+    variator.variants(treeCopy).each() { CommonTree vt ->
+      //def t = optimizer.optimize(vt)
+      ParcoVariant v = variant(vt)
+      if (v != null) { result += v }
     }
     return result
   }
