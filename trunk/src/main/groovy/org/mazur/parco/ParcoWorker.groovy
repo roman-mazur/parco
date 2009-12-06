@@ -46,7 +46,8 @@ public class ParcoWorker {
     variator = new ParcoVariator()
   }
   
-  List<ParcoVariant> addVariant(final String expr) { return addVariant(expr, true) }
+  List<ParcoVariant> addCommutativeVariant(final String expr) { return addVariant(expr, true, false) }
+  List<ParcoVariant> addDistributiveVariant(final String expr) { return addVariant(expr, true, true) }
 
   private int height(final CommonTree tree) {
     if (!tree.childCount) { return 1 }
@@ -61,7 +62,10 @@ public class ParcoWorker {
   private ParcoVariant variant(CommonTree tree) {
     ParcoVariant result = new ParcoVariant(tree : tree)
     String key = result.toString()
-    if (variantsSet.contains(key)) { return null }
+    if (variantsSet.contains(key)) {
+      println "Dublicate: $key"
+      return null 
+    }
     int h = height(tree)
     println "Height: $h"
     if (heightsFilter && heightsSet.contains(h)) { return null }
@@ -71,7 +75,7 @@ public class ParcoWorker {
     return result 
   }
   
-  List<ParcoVariant> addVariant(final String expr, final boolean modify) {
+  List<ParcoVariant> addVariant(final String expr, final boolean modify, final boolean distributive) {
     variantsSet.clear()
     heightsSet.clear()
     InputStream input = new ByteArrayInputStream(expr.bytes)
@@ -87,7 +91,9 @@ public class ParcoWorker {
     CommonTree treeCopy = ParcoVariator.copy(tree)
     result += variant(tree)
     if (!modify) { return result }
-    variator.variants(treeCopy).each() { CommonTree vt ->
+    (
+      distributive ? variator.variantsDistributive(treeCopy) : variator.variants(treeCopy)
+    ).each() { CommonTree vt ->
       //def t = optimizer.optimize(vt)
       ParcoVariant v = variant(vt)
       if (v != null) { result += v }
