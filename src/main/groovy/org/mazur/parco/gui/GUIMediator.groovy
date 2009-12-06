@@ -36,7 +36,7 @@ public class GUIMediator {
   }
   
   public void newExpression(final String expr) {
-    List<ParcoVariant> vList = worker.addVariant(expr);
+    List<ParcoVariant> vList = worker.addDistributiveVariant(expr)
     vList.each() {
       variantsList.model.addElement it
     }
@@ -55,6 +55,9 @@ public class GUIMediator {
     }
   }
   
+  public void clearVariants() {
+    variantsList.model.removeAllElements()
+  }
 }
 
 class Renderer extends JLabel implements ListCellRenderer {

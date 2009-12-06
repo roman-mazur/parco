@@ -59,6 +59,14 @@ public class MainFrame {
     }
   )
   
+  private def clearAction = swing.action(
+    name : "Clean variants",
+    shortDescription : "Remove all variants",
+    closure : {
+      mediator.clearVariants()
+    }
+  )
+  
   public void setVariantsList(final JList list) {
     variantsList = list
     mediator.variantsList = list
@@ -79,8 +87,11 @@ public class MainFrame {
         label(text : "Enter an expression", constraints : BL.NORTH)
         panel(constraints : BL.CENTER) {
           borderLayout(constraints : BL.CENTER)
-          exprField = textField(constraints : BL.CENTER, action : goAction)
-          button(text : "Go", constraints : BL.EAST, action : goAction)
+          exprField = textField(constraints : BL.CENTER, action : goAction, text : "a+b+b*d*a+e5/(e2*t+e3*t+e3+t)+(e4*e1+e5*e1)*(e7+e8*e9)")
+          panel(constraints : BL.EAST) {
+            button(action : goAction)
+            button(action : clearAction)
+          }
         }
         heightsFilterCB = checkBox(action : heigtsFilterAction, constraints : BL.SOUTH)
       }

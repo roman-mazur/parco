@@ -1,7 +1,11 @@
 package org.mazur.parco.variants;
 
+import org.mazur.parco.model.TreesComparator;
 
 import java.util.Collections;
+
+import org.antlr.runtime.CommonToken;
+
 import java.util.HashSet;
 import java.util.Map;
 
@@ -167,6 +171,169 @@ public class ParcoVariator extends ParcoOptimizer {
     getWeights(root, weights)
     def result = []
     permutateChildren(root, root, weights, result)
+    return result
+  }
+  
+  // ==========================================================================
+  
+  private CommonTree newDivider(final CommonTree node) {
+    CommonTree result = new CommonTree(new CommonToken(ParcoLexer.DIV, "/"))
+    result.addChild node
+    return result
+  }
+  
+  private Map<CommonTree, List<CommonTree>> getDistribMap(final CommonTree root) {
+    if (root.type != ParcoLexer.PLUS) { return [:] }
+    if (root.getChildCount() == 0) { return [:] }
+    
+    def result = new TreeMap(new TreesComparator())
+    def inc = { CommonTree multiplier, CommonTree parent ->
+      def entry = result[multiplier]
+      boolean needToPut = !entry
+      if (needToPut) { entry = [] }
+      entry.add parent
+      if (needToPut) { result[multiplier] = entry }
+    }
+    
+    for (CommonTree adder in root.getChildren()) {
+      if (adder.getChildCount() == 0) {
+        inc(adder, root)
+      } else {
+        if (adder.type != ParcoLexer.MULT && adder.type != ParcoLexer.DIV) { continue }
+        adder.getChildren().each() {
+          if (it.childIndex && adder.type == ParcoLexer.DIV) {
+            inc(newDivider(it), adder)
+          } else {
+            inc(it, adder) 
+          }
+        }
+      }
+    }
+    return result
+  }
+  
+  private List<CommonTree> collectMultipliers(final CommonTree root, final CommonTree copy) {
+    List<CommonTree> result = []
+    TreesComparator<CommonTree> comparator = new TreesComparator()
+    for (CommonTree adder in root.children) {
+      if (!adder.childCount) {
+        if (comparator.compare(adder, copy) == 0) { result += adder }
+        continue
+      }
+      adder.getChildren().each() {
+        if (comparator.compare(it, copy) == 0) { result += it }
+      }
+    }
+    return result
+  }
+  
+  private List<CommonTree> separate(final CommonTree root, final CommonTree copy) {
+    List<CommonTree> result = []
+    TreesComparator<CommonTree> comparator = new TreesComparator()
+    for (CommonTree adder in root.children) {
+      if (!adder.childCount) {
+        if (comparator.compare(adder, copy) != 0) { result += adder }
+        continue
+      }
+      boolean noEntries = true
+      adder.getChildren().each() {
+        if (!noEntries) { return }
+        noEntries &= comparator.compare(it, copy) != 0
+      }
+      if (noEntries) { result += adder }
+    }
+    return result
+  }
+  
+  private CommonTree popupMultiplier(CommonTree tree, final CommonTree m, final List<CommonTree> entries, List<CommonTree> sep) {
+    CommonTree root = copy(tree)
+    
+    boolean divider = m.parent.type == ParcoLexer.DIV && m.childIndex == 1
+    String text = divider ? "/" : "*"
+    int type = divider ? ParcoLexer.DIV : ParcoLexer.MULT
+    CommonTree newNode = new CommonTree(new CommonToken(type, text))
+    println "new node: $newNode"
+    int counter = 0
+    // modify root
+    for (CommonTree entry : entries) {
+      if (entry.parent == tree) { // set '1'
+        if (divider) { continue }
+        CommonTree one = new CommonTree(new CommonToken(ParcoLexer.CONST, "1"))
+        root.replaceChildren(entry.childIndex, entry.childIndex, one)
+        counter++
+      } else if (entry.parent.type == ParcoLexer.MULT) { // multiplication
+        if (divider) { continue }
+        CommonTree node = root.getChild(entry.parent.childIndex) 
+        node.deleteChild(entry.childIndex)
+        if (node.getChildCount() == 1) {
+          root.replaceChildren(node.childIndex, node.childIndex, node.getChild(0))
+        }
+      } else { // division
+        CommonTree node = root.getChild(entry.parent.childIndex) 
+        if (!divider) {
+          CommonTree one = new CommonTree(new CommonToken(ParcoLexer.CONST, "1"))
+          node.replaceChildren(0, 0, one)
+        } else {
+          root.replaceChildren(node.childIndex, node.childIndex, node.getChild(0))
+        }
+      }
+    }
+    
+    sep = sep.sort() { a, b -> a.childIndex <=> b.childIndex }
+    def sepGroup = []
+    int dec = 0
+    for (CommonTree toRemove in sep) {
+      int index = toRemove.childIndex - dec
+      sepGroup += root.getChild(index)
+      root.deleteChild index
+      dec++
+    }
+    println "sep: $sepGroup"
+    
+    newNode.parent = root.parent
+    def addRoot = {
+      newNode.addChild root
+      root.parent = newNode
+    }
+    def addM = {
+      def node = copy(m)
+      newNode.addChild node
+      node.parent = newNode
+    }
+    if (!divider) {
+      addM(); addRoot()
+    } else {
+      addRoot(); addM()
+    }
+    
+    if (!sepGroup.empty) {
+      CommonTree node = new CommonTree(new CommonToken(ParcoLexer.PLUS, "+"))
+      node.parent = newNode.parent
+      node.addChild(newNode)
+      sepGroup.each() { node.addChild(it); it.parent = node }
+      newNode = node
+    }
+    
+    return newNode
+  }
+  
+  private def fillVariants(final CommonTree root, final CommonTree treeRoot) {
+    List<CommonTree> res = []
+    Map<CommonTree, Integer> distribMap = getDistribMap(root)
+    println "---------------------------------"
+    println "root: $root -> MAP: ${distribMap}"
+    distribMap.each() {
+      if (it.value.size() <= 1) { return }
+      //List<CommonTree> entries = collectMultipliers(root, it.key)
+      println "Entries of $it.key: $it.value"
+      res += popupMultiplier(root, it.key, it.value, separate(root, it.key));
+    }
+    return res
+  }
+  
+  public List<CommonTree> variantsDistributive(final CommonTree tree) {
+    CommonTree root = optimizeFirst(copy(tree))
+    def result = fillVariants(root, root)
     return result
   }
   
