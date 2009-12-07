@@ -80,7 +80,8 @@ public class OptimizeExtender {
       Tree upTree = new CommonTree(new CommonToken(type, text))
       def toDelete = []
       node.children.eachWithIndex { CommonTree it, index ->
-        if (it.type == type || (!index && isLeaf(it))) { return }
+        //if (it.type == type || (!index && isLeaf(it))) { println "avoid $it"; return }
+        if (!index) { return }
         toDelete += it.childIndex
         upTree.addChild(it)
       }
