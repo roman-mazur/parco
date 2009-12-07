@@ -63,7 +63,7 @@ public class ParcoWorker {
     ParcoVariant result = new ParcoVariant(tree : tree)
     String key = result.toString()
     if (variantsSet.contains(key)) {
-      println "Dublicate: $key"
+      //println "Dublicate: $key"
       return null 
     }
     int h = height(tree)

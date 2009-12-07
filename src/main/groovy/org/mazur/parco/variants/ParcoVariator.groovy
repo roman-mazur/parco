@@ -311,13 +311,13 @@ public class ParcoVariator extends ParcoOptimizer {
     distribMap.each() {
       if (it.value.size() <= 1) { return }
       if (it.key.toString() == "1") { return }
-      println ">>>> popup for $root < $root.parent: $it.key, $it.value"
+      //println ">>>> popup for $root < $root.parent: $it.key, $it.value"
       def node = popupMultiplier(root, it.key, it.value, separate(root, it.value))
-      println ">>>> ${new ParcoVariant(tree : root).toString()}"
-      println ">>>> ${node.toStringTree()}"
+      //println ">>>> ${new ParcoVariant(tree : root).toString()}"
+      //println ">>>> ${node.toStringTree()}"
       popupAll(node, index + 1) {
         if (it.empty) {
-          println ">>>> add result"
+          //println ">>>> add result"
           results.add node
         } else {
           results += it
@@ -340,10 +340,10 @@ public class ParcoVariator extends ParcoOptimizer {
           } else {
             newRoot.parent.replaceChildren(newRoot.childIndex, newRoot.childIndex, newRoot)
           }
-          println "#### have parent-> replace: ${newRoot.parent.toStringTree()}"
+          //println "#### have parent-> replace: ${newRoot.parent.toStringTree()}"
         } else {
           treeRoot = newRoot
-          println "#### new root: ${treeRoot.toStringTree()}"
+          //println "#### new root: ${treeRoot.toStringTree()}"
         }
         def childrenResults = []
         if (newRoot.children) {
