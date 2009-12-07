@@ -76,7 +76,8 @@ public class ParcoVariator extends ParcoOptimizer {
     CommonTree result = tree
     while (affected) {
       affected = false
-      result = super.optimize(result) 
+      result = super.optimize(result)
+      println result.toStringTree()
     }
     return result
   }
@@ -178,33 +179,33 @@ public class ParcoVariator extends ParcoOptimizer {
   
   private CommonTree newDivider(final CommonTree node) {
     CommonTree result = new CommonTree(new CommonToken(ParcoLexer.DIV, "/"))
-    result.addChild node
+    result.addChild copy(node)
     return result
   }
   
   private Map<CommonTree, List<CommonTree>> getDistribMap(final CommonTree root) {
-    if (root.type != ParcoLexer.PLUS) { return [:] }
+    if (root.type != ParcoLexer.PLUS && root.type != ParcoLexer.MINUS) { return [:] }
     if (root.getChildCount() == 0) { return [:] }
     
     def result = new TreeMap(new TreesComparator())
-    def inc = { CommonTree multiplier, CommonTree parent ->
+    def inc = { CommonTree multiplier, CommonTree e ->
       def entry = result[multiplier]
       boolean needToPut = !entry
       if (needToPut) { entry = [] }
-      entry.add parent
+      entry.add e
       if (needToPut) { result[multiplier] = entry }
     }
     
     for (CommonTree adder in root.getChildren()) {
       if (adder.getChildCount() == 0) {
-        inc(adder, root)
+        inc(adder, adder)
       } else {
         if (adder.type != ParcoLexer.MULT && adder.type != ParcoLexer.DIV) { continue }
         adder.getChildren().each() {
           if (it.childIndex && adder.type == ParcoLexer.DIV) {
-            inc(newDivider(it), adder)
+            inc(newDivider(it), it)
           } else {
-            inc(it, adder) 
+            inc(it, it) 
           }
         }
       }
@@ -212,43 +213,24 @@ public class ParcoVariator extends ParcoOptimizer {
     return result
   }
   
-  private List<CommonTree> collectMultipliers(final CommonTree root, final CommonTree copy) {
+  private List<CommonTree> separate(final CommonTree root, final List<CommonTree> entries) {
     List<CommonTree> result = []
-    TreesComparator<CommonTree> comparator = new TreesComparator()
     for (CommonTree adder in root.children) {
       if (!adder.childCount) {
-        if (comparator.compare(adder, copy) == 0) { result += adder }
+        if (!entries.contains(adder)) { result.add adder }
         continue
       }
-      adder.getChildren().each() {
-        if (comparator.compare(it, copy) == 0) { result += it }
-      }
+      if (!(entries.any() {
+        adder.children.contains(it)
+      })) { result.add adder }
     }
     return result
   }
   
-  private List<CommonTree> separate(final CommonTree root, final CommonTree copy) {
-    List<CommonTree> result = []
-    TreesComparator<CommonTree> comparator = new TreesComparator()
-    for (CommonTree adder in root.children) {
-      if (!adder.childCount) {
-        if (comparator.compare(adder, copy) != 0) { result += adder }
-        continue
-      }
-      boolean noEntries = true
-      adder.getChildren().each() {
-        if (!noEntries) { return }
-        noEntries &= comparator.compare(it, copy) != 0
-      }
-      if (noEntries) { result += adder }
-    }
-    return result
-  }
-  
-  private CommonTree popupMultiplier(CommonTree tree, final CommonTree m, final List<CommonTree> entries, List<CommonTree> sep) {
+  private CommonTree popupMultiplier(CommonTree tree, CommonTree m, final List<CommonTree> entries, List<CommonTree> sep) {
     CommonTree root = copy(tree)
     
-    boolean divider = m.parent.type == ParcoLexer.DIV && m.childIndex == 1
+    boolean divider = m.type == ParcoLexer.DIV && m.childCount == 1
     String text = divider ? "/" : "*"
     int type = divider ? ParcoLexer.DIV : ParcoLexer.MULT
     CommonTree newNode = new CommonTree(new CommonToken(type, text))
@@ -290,7 +272,9 @@ public class ParcoVariator extends ParcoOptimizer {
     }
     println "sep: $sepGroup"
     
-    newNode.parent = root.parent
+    newNode.parent = tree.parent
+    println "Setting parent ${tree.parent}"
+    newNode.childIndex = tree.childIndex
     def addRoot = {
       newNode.addChild root
       root.parent = newNode
@@ -303,12 +287,14 @@ public class ParcoVariator extends ParcoOptimizer {
     if (!divider) {
       addM(); addRoot()
     } else {
+      m = m.getChild(0)
       addRoot(); addM()
     }
     
     if (!sepGroup.empty) {
       CommonTree node = new CommonTree(new CommonToken(ParcoLexer.PLUS, "+"))
       node.parent = newNode.parent
+      node.childIndex = newNode.childIndex
       node.addChild(newNode)
       sepGroup.each() { node.addChild(it); it.parent = node }
       newNode = node
@@ -317,23 +303,71 @@ public class ParcoVariator extends ParcoOptimizer {
     return newNode
   }
   
-  private def fillVariants(final CommonTree root, final CommonTree treeRoot) {
-    List<CommonTree> res = []
-    Map<CommonTree, Integer> distribMap = getDistribMap(root)
-    println "---------------------------------"
-    println "root: $root -> MAP: ${distribMap}"
+  private void popupAll(final CommonTree root, int index, def setResults) {
+    println ">>>> $index"
+    def results = []
+    def distribMap = getDistribMap(root)
+    println "root: $root, map: $distribMap"
     distribMap.each() {
       if (it.value.size() <= 1) { return }
-      //List<CommonTree> entries = collectMultipliers(root, it.key)
-      println "Entries of $it.key: $it.value"
-      res += popupMultiplier(root, it.key, it.value, separate(root, it.key));
+      if (it.key.toString() == "1") { return }
+      println ">>>> popup for $root < $root.parent: $it.key, $it.value"
+      def node = popupMultiplier(root, it.key, it.value, separate(root, it.value))
+      println ">>>> ${new ParcoVariant(tree : root).toString()}"
+      println ">>>> ${node.toStringTree()}"
+      popupAll(node, index + 1) {
+        if (it.empty) {
+          println ">>>> add result"
+          results.add node
+        } else {
+          results += it
+        }
+      }
     }
-    return res
+    println ">>>>$index exit: $results"
+    setResults(results)
+  }
+  
+  private void fillVariants(final CommonTree root, CommonTree treeRoot, final def setResult) {
+    println "---------------------------------"
+    def result = []
+    popupAll(root, 0) { rootResults ->
+      for (CommonTree newRoot in (rootResults ? rootResults : [root])) {
+        if (newRoot.parent) {
+          if (newRoot.type == newRoot.parent.type && newRoot.type != ParcoLexer.DIV) {
+            newRoot.parent.deleteChild(newRoot.childIndex)
+            newRoot.children.each() { newRoot.parent.addChild it; it.parent = newRoot.parent }
+          } else {
+            newRoot.parent.replaceChildren(newRoot.childIndex, newRoot.childIndex, newRoot)
+          }
+          println "#### have parent-> replace: ${newRoot.parent.toStringTree()}"
+        } else {
+          treeRoot = newRoot
+          println "#### new root: ${treeRoot.toStringTree()}"
+        }
+        def childrenResults = []
+        if (newRoot.children) {
+          for (CommonTree child in new ArrayList(newRoot.children)) {
+            fillVariants(child, treeRoot) { childrenResults += it }
+          }
+        }
+        if (!childrenResults) {
+          result.add copy(treeRoot)
+        } else {
+          result += childrenResults
+        }
+      }
+    }
+    println "=========== $result"
+    setResult(result)
   }
   
   public List<CommonTree> variantsDistributive(final CommonTree tree) {
     CommonTree root = optimizeFirst(copy(tree))
-    def result = fillVariants(root, root)
+    def result = null
+    fillVariants(root, root) {
+      result = it.collect { optimize(it) }
+    }
     return result
   }
   
