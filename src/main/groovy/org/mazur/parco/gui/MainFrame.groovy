@@ -41,6 +41,9 @@ public class MainFrame {
   /** List. */
   JList variantsList
   
+  /** Count of processors. */
+  private JTextField processorsField
+  
   /** Main action. */
   private def goAction = swing.action(
     name : "Go",
@@ -64,6 +67,14 @@ public class MainFrame {
     shortDescription : "Remove all variants",
     closure : {
       mediator.clearVariants()
+    }
+  )
+  
+  private def loadAction = swing.action(
+    name : "Load variant",
+    shortDescription : "Load the selected variant",
+    closure : {
+      mediator.loadVariant(variantsList.selectedIndex, Integer.parseInt(processorsField.text))
     }
   )
   
@@ -106,6 +117,12 @@ public class MainFrame {
             }
           })
         }
+      }
+      panel(constraints : BL.SOUTH) {
+        borderLayout()
+        label(text : "Number of processors", constraints : BL.WEST)
+        processorsField = textField(text : "3", action : loadAction, constraints : BL.CENTER)
+        button(action : loadAction, constraints : BL.EAST)
       }
     }
     frame.visible = true

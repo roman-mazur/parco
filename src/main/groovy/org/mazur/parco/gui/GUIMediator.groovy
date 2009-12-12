@@ -3,12 +3,12 @@ package org.mazur.parco.gui;
 
 import org.mazur.parco.ParcoWorker;
 import org.mazur.parco.variants.ParcoVariant;
+
+import org.mazur.parco.loader.TreeLoader;
 import org.mazur.parco.visualizer.Vizualizer;
 
 import groovy.swing.SwingBuilder;
-
 import java.awt.Component;
-
 import javax.swing.JLabel;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
@@ -57,6 +57,14 @@ public class GUIMediator {
   
   public void clearVariants() {
     variantsList.model.removeAllElements()
+  }
+  
+  public void loadVariant(final int index, final int n) {
+    ParcoVariant v = (ParcoVariant)variantsList.model.getElementAt(index)
+    TreeLoader loader = new TreeLoader(v.tree, n)
+    loader.initialize()
+    LoadFrame frame = new LoadFrame()
+    loader.load()
   }
 }
 
