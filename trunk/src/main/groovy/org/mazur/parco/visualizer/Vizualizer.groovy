@@ -1,6 +1,7 @@
 package org.mazur.parco.visualizer
 
 import org.antlr.runtime.tree.CommonTree;
+import org.mazur.parco.loader.LoadStep;
 
 import java.io.ByteArrayInputStream;
 
@@ -32,7 +33,13 @@ public class Vizualizer {
     return getImage(gen.toDOT(tree).toString())
   }
   
+  public static Image getImage(final CommonTree tree, final LoadStep loadStep) {
+    DotGen gen = new DotGen()
+    return getImage(gen.toDOT(tree, loadStep).toString())
+  }
+
   public static Image getImage(final String source) {
+    println source
     String[] args = new String[3]
     [
       "dot",

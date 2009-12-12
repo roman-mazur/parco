@@ -63,8 +63,9 @@ public class GUIMediator {
     ParcoVariant v = (ParcoVariant)variantsList.model.getElementAt(index)
     TreeLoader loader = new TreeLoader(v.tree, n)
     loader.initialize()
-   // LoadFrame frame = new LoadFrame()
-    loader.load()
+    LoadFrame frame = new LoadFrame()
+    def loadSteps = loader.load()
+    frame.show(loadSteps, n, v.tree)
   }
 }
 

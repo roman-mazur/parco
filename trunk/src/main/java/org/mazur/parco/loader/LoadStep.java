@@ -13,6 +13,23 @@ public class LoadStep {
 
   private Collection<CommonTree> finishedOperations;
 
+  /** Duration. */
+  private int duration;
+  
+  /**
+   * @return the duration
+   */
+  public int getDuration() {
+    return duration;
+  }
+
+  /**
+   * @param duration the duration to set
+   */
+  public void setDuration(int duration) {
+    this.duration = duration;
+  }
+
   /**
    * @return the finishedOperations
    */

@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.antlr.runtime.tree.CommonTree;
+import org.mazur.parco.parser.ParcoLexer;
 
 /**
  * 
@@ -28,6 +29,18 @@ public class TreeLoader {
   public TreeLoader(final CommonTree root, final int processorsCount) {
     this.root = root; 
     this.processorsCount = processorsCount;
+  }
+  
+  public static int getWeight(final int type) {
+    switch (type) {
+    case ParcoLexer.PLUS: 
+    case ParcoLexer.MINUS: return 2;
+    case ParcoLexer.MOD:
+    case ParcoLexer.DIV: return 8;
+    case ParcoLexer.MULT: return 5;
+    case ParcoLexer.POWER: return 9;
+    default: return 0;
+    }
   }
   
   @SuppressWarnings("unchecked")
@@ -64,14 +77,23 @@ public class TreeLoader {
   
   public List<LoadStep> load() {
     List<LoadStep> result = new LinkedList<LoadStep>();
+    int lastDuration = 0;
     while (!operations.isEmpty()) {
       List<CommonTree> toLoad = selectOperations();
-      System.out.println("Selected: " + toLoad);
+      int maxDuration = 0;
+      for (CommonTree op : toLoad) {
+        int w = getWeight(op.getType());
+        if (w > maxDuration) { maxDuration = w; }
+      }
+      maxDuration += lastDuration;
+      System.out.println("Selected: " + toLoad + " duration: " + maxDuration);
       finished.addAll(toLoad);
       operations.removeAll(toLoad);
       LoadStep step = new LoadStep();
       step.setFinishedOperations(new ArrayList<CommonTree>(finished));
+      step.setDuration(maxDuration);
       result.add(step);
+      lastDuration = maxDuration;
     }
     return result;
   }

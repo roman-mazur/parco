@@ -1,5 +1,6 @@
 package org.mazur.parco.variants;
 
+import static org.mazur.parco.loader.TreeLoader.getWeight;
 import org.mazur.parco.model.TreesComparator;
 
 import java.util.Collections;
@@ -21,18 +22,6 @@ import org.mazur.parco.parser.ParcoLexer;
  */
 @SuppressWarnings("unchecked")
 public class ParcoVariator extends ParcoOptimizer {
-  
-  private int getWeight(final int type) {
-    switch (type) {
-    case ParcoLexer.PLUS: 
-    case ParcoLexer.MINUS: return 2
-    case ParcoLexer.MOD:
-    case ParcoLexer.DIV: return 8
-    case ParcoLexer.MULT: return 5
-    case ParcoLexer.POWER: return 9
-    default: return 0
-    }
-  }
   
   public static CommonTree copy(final CommonTree tree) {
     LinkedList<CommonTree> queue = new LinkedList<CommonTree>()
