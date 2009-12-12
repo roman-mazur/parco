@@ -67,9 +67,9 @@ public class DotGen extends DOTTreeGenerator {
     String fontColor = 'black'
     String shape = 'circle'
     
-    if (((Tree)t).getChildCount() == 0) { shape = 'box' }
+    if (((Tree)t).getChildCount() == 0) { shape = 'box'; fillColor = 'grey' }
     if (loadStep) {
-      if (loadStep.getFinishedOperations().contains(t)) {
+      if (loadStep.getFinishedOperations().contains(t) && ((Tree)t).getChildCount() > 0) {
         fillColor = 'green'
       }
     }
