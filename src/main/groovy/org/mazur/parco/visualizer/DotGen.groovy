@@ -18,8 +18,7 @@ public class DotGen extends DOTTreeGenerator {
     Integer nI = (Integer)nodeToNumberMap.get(t);
     if ( nI!=null ) {
       return nI.intValue();
-    }
-    else {
+    } else {
       nodeToNumberMap.put(t, new Integer(nodeNumber));
       nodeNumber++;
       return nodeNumber-1;
