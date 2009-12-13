@@ -59,9 +59,9 @@ public class GUIMediator {
     variantsList.model.removeAllElements()
   }
   
-  public void loadVariant(final int index, final int n) {
+  public void loadVariant(final int index, final int n, final boolean sync) {
     ParcoVariant v = (ParcoVariant)variantsList.model.getElementAt(index)
-    TreeLoader loader = new TreeLoader(v.tree, n)
+    TreeLoader loader = new TreeLoader(v.tree, n, sync)
     loader.initialize()
     LoadFrame frame = new LoadFrame()
     def loadSteps = loader.load()
