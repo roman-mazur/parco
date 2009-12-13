@@ -44,6 +44,8 @@ public class MainFrame {
   /** Count of processors. */
   private JTextField processorsField
   
+  private JCheckBox syncBox
+  
   /** Main action. */
   private def goAction = swing.action(
     name : "Go",
@@ -74,7 +76,7 @@ public class MainFrame {
     name : "Load variant",
     shortDescription : "Load the selected variant",
     closure : {
-      mediator.loadVariant(variantsList.selectedIndex, Integer.parseInt(processorsField.text))
+      mediator.loadVariant(variantsList.selectedIndex, Integer.parseInt(processorsField.text), syncBox.selected)
     }
   )
   
@@ -122,7 +124,10 @@ public class MainFrame {
         borderLayout()
         label(text : "Number of processors", constraints : BL.WEST)
         processorsField = textField(text : "3", action : loadAction, constraints : BL.CENTER)
-        button(action : loadAction, constraints : BL.EAST)
+        hbox(constraints : BL.EAST) {
+          syncBox = checkBox("Synchronous")
+          button(action : loadAction)
+        }
       }
     }
     frame.visible = true

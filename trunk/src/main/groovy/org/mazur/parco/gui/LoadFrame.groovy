@@ -4,9 +4,11 @@ import groovy.swing.SwingBuilder;
 import java.awt.BorderLayout;
 
 import javax.swing.ImageIcon;
+import javax.swing.JTable;
 import javax.swing.JLabel;
 import org.mazur.parco.loader.LoadStep;
 import org.antlr.runtime.tree.CommonTree;
+import org.mazur.parco.variants.ParcoVariator;
 import org.mazur.parco.visualizer.Vizualizer;
 import java.awt.Image;
 
@@ -15,6 +17,8 @@ public class LoadFrame {
   private SwingBuilder swing = new SwingBuilder()
   
   private JLabel imageLabel, timeLabel, stepLabel
+  
+  private ProcessorsTableModel tableModel
   
   private List<Image> loadStepImages
   private List<LoadStep> loadSteps
@@ -32,6 +36,7 @@ public class LoadFrame {
       imageLabel.icon = new ImageIcon(stepImage)
       timeLabel.text = "$step.duration"
       stepLabel.text = "$stepCounter"
+      tableModel.nextStep()
     }
   )
   
@@ -41,19 +46,44 @@ public class LoadFrame {
     for (LoadStep step in loadSteps) {
       this.loadStepImages += Vizualizer.getImage(root, step)
     }
+    
+    tableModel = new ProcessorsTableModel(loadSteps, n)
+    
     (swing.frame(title : "Loader", pack : true) {
       borderLayout()
       panel(constraints : BorderLayout.NORTH) {
-        vbox {
-          label("Count of processors: $n")
-          hbox() { label("Time: "); timeLabel = label() }
-          hbox() { label("Step: "); stepLabel = label() }
-          button(action : stepAction)
-        }
+          hbox() {
+            vbox() {
+              label("Count of processors: $n")
+              hbox() { label("Time: "); timeLabel = label() }
+              hbox() { label("Step: "); stepLabel = label() }
+              button(action : stepAction)
+            }
+            vbox() {
+              ParcoVariator pv = new ParcoVariator()
+              int to = pv.getWeight(root)
+              int tp = loadSteps[loadSteps.size() - 1].duration
+              label("To: $to")
+              label("Tp: $tp")
+              label("Ka: ${to/tp}")
+              label("Ke: ${to/tp/n}")
+            }
+          }
       }
-      panel(constraints : BorderLayout.CENTER) {
-        imageLabel = label(icon : new ImageIcon(Vizualizer.getImage(root)))
-      }
+      splitPane(
+        leftComponent : (panel(constraints : BorderLayout.CENTER) {
+          borderLayout()
+          scrollPane() {
+            imageLabel = label(icon : new ImageIcon(Vizualizer.getImage(root)))
+          }
+        }),
+        rightComponent : (panel(constraints : BorderLayout.EAST) {
+          borderLayout()
+          scrollPane() {
+            widget(new JTable(tableModel))
+          }
+        })
+      )
     }).visible = true
   }
   

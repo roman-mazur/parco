@@ -58,6 +58,12 @@ public class ParcoVariator extends ParcoOptimizer {
     result[root] = res
   }
   
+  public int getWeight(final CommonTree root) {
+    Map res = [:]
+    getWeights(root, res)
+    return res[root]
+  }
+  
   public CommonTree optimizeFirst(final CommonTree tree) {
     optimizers = []
     boolean affected = true
