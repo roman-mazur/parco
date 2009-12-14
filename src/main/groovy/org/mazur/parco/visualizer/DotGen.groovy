@@ -1,15 +1,11 @@
 package org.mazur.parco.visualizer
 
-import java.util.LinkedList;
-
-import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.Tree;
-import org.antlr.runtime.tree.DOTTreeGenerator
-import org.antlr.runtime.tree.TreeAdaptor
-import org.antlr.stringtemplate.StringTemplate
-import org.mazur.parco.loader.LoadStep;
-import org.mazur.parco.optimize.ParcoOptimizer.NodeOptimizer;
+import org.antlr.runtime.tree.DOTTreeGenerator;
 import org.mazur.parco.utils.TreeHelper;
+import org.antlr.runtime.tree.TreeAdaptor;
+import org.antlr.stringtemplate.StringTemplate;
+import org.mazur.parco.loader.LoadStep;
 
 
 public class DotGen extends DOTTreeGenerator {
@@ -44,7 +40,7 @@ public class DotGen extends DOTTreeGenerator {
     this.nodeToNumberMap = TreeHelper.getNodeNumbers(tree)
     return super.toDOT(tree)
   }
-  
+
   protected void toDOTDefineNodes(Object tree, TreeAdaptor adaptor, StringTemplate treeST) {
     if (tree == null) { return }
 
