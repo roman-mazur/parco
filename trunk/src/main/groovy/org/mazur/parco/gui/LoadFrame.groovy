@@ -7,6 +7,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JTable;
 import javax.swing.JLabel;
 import org.mazur.parco.loader.LoadStep;
+import org.mazur.parco.loader.TreeLoader;
+import org.mazur.parco.parser.ParcoLexer;
 import org.antlr.runtime.tree.CommonTree;
 import org.mazur.parco.variants.ParcoVariator;
 import org.mazur.parco.visualizer.Vizualizer;
@@ -54,7 +56,7 @@ public class LoadFrame {
       panel(constraints : BorderLayout.NORTH) {
           hbox() {
             vbox() {
-              label("Count of processors: $n")
+              label("Count of processors: $n   ")
               hbox() { label("Time: "); timeLabel = label() }
               hbox() { label("Step: "); stepLabel = label() }
               button(action : stepAction)
@@ -63,10 +65,19 @@ public class LoadFrame {
               ParcoVariator pv = new ParcoVariator()
               int to = pv.getWeight(root)
               int tp = loadSteps[loadSteps.size() - 1].duration
-              label("To: $to")
-              label("Tp: $tp")
-              label("Ka: ${to/tp}")
-              label("Ke: ${to/tp/n}")
+              label("To: $to  ")
+              label("Tp: $tp  ")
+              label("Ka: ${to/tp}  ")
+              label("Ke: ${to/tp/n}  ")
+            }
+            vbox() {
+              label("  Operations:")
+              label("  + " + TreeLoader.getWeight(ParcoLexer.PLUS))
+              label("  - " + TreeLoader.getWeight(ParcoLexer.MINUS))
+              label("  * " + TreeLoader.getWeight(ParcoLexer.MULT))
+              label("  / " + TreeLoader.getWeight(ParcoLexer.DIV))
+              label("  % " + TreeLoader.getWeight(ParcoLexer.MOD))
+              label("  ** " + TreeLoader.getWeight(ParcoLexer.POWER))
             }
           }
       }
