@@ -1,9 +1,15 @@
 package org.mazur.parco.gui;
 
+import javax.swing.JTable;
 
 import org.mazur.parco.ParcoWorker;
 import org.mazur.parco.variants.ParcoVariant;
+import java.awt.event.MouseEvent;
 
+import org.mazur.parco.variants.ParcoVariator;
+
+
+import org.mazur.parco.loader.LoadStep;
 import org.mazur.parco.loader.TreeLoader;
 import org.mazur.parco.visualizer.Vizualizer;
 
@@ -66,6 +72,54 @@ public class GUIMediator {
     LoadFrame frame = new LoadFrame()
     def loadSteps = loader.load()
     frame.show(loadSteps, n, v.tree)
+  }
+  
+  public void model(final String expr, final int n, final boolean sync) {
+    List<ParcoVariant> vList = worker.addDistributiveVariant(expr)
+    List<ParcoVariant> aList = worker.addCommutativeVariant(expr)
+    aList.remove 0
+    vList.addAll aList
+    
+    int toBase
+    String[] columns = ['Expr', 'To', 'Tp', 'Ka', 'Ke', 'Ka2', 'Ke2', 'Variator'].toArray()
+    Object[][] data = new Object[vList.size()][]
+    vList.eachWithIndex() { ParcoVariant v, int index ->
+      TreeLoader loader = new TreeLoader(v.tree, n, sync)
+      loader.initialize()
+      def loadSteps = loader.load()
+      ParcoVariator pv = new ParcoVariator()
+      int to = pv.getWeight(v.tree)
+      int tp = loadSteps[-1].duration
+      if (index == 0) { toBase = to }
+      double ka = toBase / tp
+      double ke = ka / n
+      double ka2 = to / tp
+      double ke2 = ka2 / n
+     
+      data[index] = [v.toString(), to, tp, ka, ke, ka2, ke2, v.variator].toArray()
+    }
+    
+    SwingBuilder.build {
+      frame(title : 'Results', pack : true, visible : true) {
+        borderLayout()
+        def tbl = new JTable(data, columns)
+        tbl.addMouseListener new MouseClosure({ MouseEvent event ->
+          if (event.clickCount == 2) {
+            ParcoVariant v = vList[tbl.getSelectedRow()]
+            if (!v.image) { v.image = Vizualizer.getImage(v.tree) }
+            SwingBuilder.build() {
+              (frame(title : v.toString(), pack : true) {
+                label(icon : new ImageIcon(v.image))
+              }).visible = true
+            }
+          }
+        })
+        tbl.setAutoCreateRowSorter true
+        scrollPane() {
+          widget(tbl)
+        }
+      }
+    }
   }
 }
 

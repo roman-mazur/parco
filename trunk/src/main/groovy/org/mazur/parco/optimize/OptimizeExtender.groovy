@@ -104,7 +104,11 @@ public class OptimizeExtender {
       int minCount = node.childCount / 2
       if (node.childCount % 2) { minCount++ }
       int count = node.children.size()
-      node.children.eachWithIndex { child, i ->
+      def sortedChildren = node.children.sort() { a, b ->
+        ParcoVariator pv = new ParcoVariator()
+        pv.getWeight(a) <=> pv.getWeight(b) 
+      } 
+      sortedChildren.eachWithIndex { child, i ->
         int index = (int)(i / minCount)
         Tree p = newChildren[index]
         child.parent = p

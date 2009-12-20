@@ -96,7 +96,10 @@ public class ParcoWorker {
     ).each() { CommonTree vt ->
       //def t = optimizer.optimize(vt)
       ParcoVariant v = variant(vt)
-      if (v != null) { result += v }
+      if (v != null) { 
+        v.variator = distributive ? 'Distributive' : 'Commutative'
+        result += v 
+      }
     }
     return result
   }

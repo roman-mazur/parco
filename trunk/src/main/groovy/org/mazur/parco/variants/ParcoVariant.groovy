@@ -13,6 +13,8 @@ public class ParcoVariant {
   
   String str
   
+  String variator
+  
   private String getString(final CommonTree tree) {
     if (!tree) { return '' }
     if (tree.token.type == ParcoLexer.IDENTIFIER || tree.token.type == ParcoLexer.CONST) {

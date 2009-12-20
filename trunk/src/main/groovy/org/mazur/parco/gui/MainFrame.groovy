@@ -80,6 +80,14 @@ public class MainFrame {
     }
   )
   
+  private def modelAction = swing.action(
+    name : "Model",
+    shortDescription : "Run all variants",
+    closure : {
+      mediator.model(exprField.text, Integer.parseInt(processorsField.text), syncBox.selected)
+    }
+  )
+
   public void setVariantsList(final JList list) {
     variantsList = list
     mediator.variantsList = list
@@ -104,6 +112,7 @@ public class MainFrame {
           panel(constraints : BL.EAST) {
             button(action : goAction)
             button(action : clearAction)
+            button(action : modelAction)
           }
         }
         heightsFilterCB = checkBox(action : heigtsFilterAction, constraints : BL.SOUTH)
