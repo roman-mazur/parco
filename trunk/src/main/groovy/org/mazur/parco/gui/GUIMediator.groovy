@@ -104,8 +104,10 @@ public class GUIMediator {
         borderLayout()
         def tbl = new JTable(data, columns)
         tbl.addMouseListener new MouseClosure({ MouseEvent event ->
-          if (event.clickCount == 2) {
-            ParcoVariant v = vList[tbl.getSelectedRow()]
+          if (event.isShiftDown()) {
+            int index = tbl.getRowSorter().convertRowIndexToModel(tbl.getSelectedRow())
+            String e = tbl.getModel().getValueAt(index, 0)
+            ParcoVariant v = vList.find { it.toString() == e }
             if (!v.image) { v.image = Vizualizer.getImage(v.tree) }
             SwingBuilder.build() {
               (frame(title : v.toString(), pack : true) {

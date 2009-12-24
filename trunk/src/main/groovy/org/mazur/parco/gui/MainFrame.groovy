@@ -108,7 +108,7 @@ public class MainFrame {
         label(text : "Enter an expression", constraints : BL.NORTH)
         panel(constraints : BL.CENTER) {
           borderLayout(constraints : BL.CENTER)
-          exprField = textField(constraints : BL.CENTER, action : goAction, text : "a*b+a*c+d*b+c*d + e1*t + e1*r + e2*t+e2*r") //"a+b+b*d*a+e5/(e2*t+e3*t+e3+t)+(e4*e1+e5*e1)*(e7+e8*e9)")
+          exprField = textField(constraints : BL.CENTER, action : goAction, text : "a+b+b*d*a+e5/(e2*t+e3*t+e3+t)+(e4*e1+e5*e1)*(e7+e8*e9)") //"a*b+a*c+d*b+c*d + e1*t + e1*r + e2*t+e2*r")
           panel(constraints : BL.EAST) {
             button(action : goAction)
             button(action : clearAction)
