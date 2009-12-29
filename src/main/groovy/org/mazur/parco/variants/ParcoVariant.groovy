@@ -26,7 +26,7 @@ public class ParcoVariant {
       sb << getString(tree.getChild(0))
       cIndex = 1
     }
-    sb << ' ' << tree.toString() << ' ' << getString(tree.getChild(cIndex))
+    sb << tree.toString() << getString(tree.getChild(cIndex))
     return '(' + sb.toString() + ')'
   }
   
