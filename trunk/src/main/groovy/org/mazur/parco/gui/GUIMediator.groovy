@@ -42,9 +42,12 @@ public class GUIMediator {
   }
   
   public void newExpression(final String expr) {
-    List<ParcoVariant> vList = worker.addDistributiveVariant(expr)
+    List<ParcoVariant> vList = worker.addCommutativeVariant(expr)
+    vList += worker.addDistributiveVariant(expr)
+    println "------------${expr}"
     vList.each() {
       variantsList.model.addElement it
+      println it
     }
     println variantsList.model.size()
   }

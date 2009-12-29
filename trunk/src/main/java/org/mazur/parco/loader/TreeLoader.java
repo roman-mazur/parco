@@ -48,12 +48,12 @@ public class TreeLoader {
   
   public static int getWeight(final int type) {
     switch (type) {
-    case ParcoLexer.PLUS: 
+    case ParcoLexer.PLUS: return 1;
     case ParcoLexer.MINUS: return 2;
     case ParcoLexer.MOD:
-    case ParcoLexer.DIV: return 8;
+    case ParcoLexer.DIV:
     case ParcoLexer.MULT: return 5;
-    case ParcoLexer.POWER: return 9;
+    case ParcoLexer.POWER: return 8;
     default: return 0;
     }
   }
